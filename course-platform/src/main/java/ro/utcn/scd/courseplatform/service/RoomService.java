@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ro.utcn.scd.courseplatform.dto.RoomDto;
 import ro.utcn.scd.courseplatform.model.Room;
 import ro.utcn.scd.courseplatform.model.enums.RoomType;
+import ro.utcn.scd.courseplatform.model.enums.WeekParity;
 import ro.utcn.scd.courseplatform.repository.RoomRepository;
 
 import java.util.List;
@@ -21,6 +22,15 @@ public class RoomService {
     @Transactional(readOnly = true)
     public List<RoomDto> findAll(RoomType type, Long buildingId) {
         return repository.search(type, buildingId).stream().map(RoomDto::from).toList();
+    }
+
+    /** OPERATIE COMPLEXA: salile libere intr-un slot al unui orar (query custom cu NOT EXISTS). */
+    @Transactional(readOnly = true)
+    public List<RoomDto> findAvailable(Long timetableId, Long timeSlotId, WeekParity parity,
+                                       int minCapacity, RoomType type) {
+        lookup.timeSlot(timeSlotId);
+        return repository.findAvailable(timetableId, timeSlotId, parity, minCapacity, type).stream()
+                .map(RoomDto::from).toList();
     }
 
     @Transactional(readOnly = true)

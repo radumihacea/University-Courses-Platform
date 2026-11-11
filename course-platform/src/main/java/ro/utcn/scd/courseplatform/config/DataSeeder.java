@@ -19,7 +19,8 @@ import java.util.*;
  * Populeaza baza de date la prima pornire cu structura anului IV AIA,
  * semestrul I 2026-2027 (dupa orarul oficial al facultatii).
  *
- * Numele profesorilor sunt anonimizate: Profesor_Curs_X, Asistent_Lab_X, Asistent_Proiect_X.
+ * Numele profesorilor sunt anonimizate dupa disciplina:
+ * Profesor_Curs_SCD_A, Asistent_Lab_SCD, Asistent_Proiect_SCD etc.
  * Toate conturile demo au parola "parola123".
  *
  * Ruleaza doar daca tabela users este goala, deci nu dubleaza datele la reporniri.
@@ -31,6 +32,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private static final String DEMO_PASSWORD = "parola123";
     private static final int STUDY_YEAR = 4;
+    private static final int STUDENTS_PER_GROUP = 28;
 
     private final UserRepository userRepository;
     private final ProfessorRepository professorRepository;
@@ -85,31 +87,31 @@ public class DataSeeder implements CommandLineRunner {
         user("Admin Secretariat", "admin@utcn.ro", Role.ADMIN);
 
         // --- Titulari de curs ---
-        Professor pMad = professor("Profesor_Curs_1", "profesor.curs1@utcn.ro", "Prof. dr. ing.");
-        Professor pMea = professor("Profesor_Curs_2", "profesor.curs2@utcn.ro", "Conf. dr. ing.");
-        Professor pEtica = professor("Profesor_Curs_3", "profesor.curs3@utcn.ro", "Conf. dr.");
-        Professor pScdA = professor("Profesor_Curs_4", "profesor.curs4@utcn.ro", "S.l. dr. ing.");
-        Professor pFd = professor("Profesor_Curs_5", "profesor.curs5@utcn.ro", "Prof. dr. ing.");
-        Professor pScpc = professor("Profesor_Curs_6", "profesor.curs6@utcn.ro", "Prof. dr. ing.");
-        Professor pScr = professor("Profesor_Curs_7", "profesor.curs7@utcn.ro", "Conf. dr. ing.");
-        Professor pScdIA = professor("Profesor_Curs_8", "profesor.curs8@utcn.ro", "Prof. dr. ing.");
-        Professor pRc = professor("Profesor_Curs_9", "profesor.curs9@utcn.ro", "Conf. dr. ing.");
-        Professor pMp = professor("Profesor_Curs_10", "profesor.curs10@utcn.ro", "Conf. dr. ing.");
-        Professor pMkt = professor("Profesor_Curs_11", "profesor.curs11@utcn.ro", "Lect. dr.");
-        Professor pDpp = professor("Profesor_Curs_12", "profesor.curs12@utcn.ro", "Lect. dr.");
+        Professor pMad = professor("Profesor_Curs_MAD", "profesor.curs.mad@utcn.ro", "Prof. dr. ing.");
+        Professor pMea = professor("Profesor_Curs_MEA", "profesor.curs.mea@utcn.ro", "Conf. dr. ing.");
+        Professor pEtica = professor("Profesor_Curs_EIA", "profesor.curs.eia@utcn.ro", "Conf. dr.");
+        Professor pScdA = professor("Profesor_Curs_SCD_A", "profesor.curs.scd.a@utcn.ro", "S.l. dr. ing.");
+        Professor pFd = professor("Profesor_Curs_FD", "profesor.curs.fd@utcn.ro", "Prof. dr. ing.");
+        Professor pScpc = professor("Profesor_Curs_SCPC", "profesor.curs.scpc@utcn.ro", "Prof. dr. ing.");
+        Professor pScr = professor("Profesor_Curs_SCR", "profesor.curs.scr@utcn.ro", "Conf. dr. ing.");
+        Professor pScdIA = professor("Profesor_Curs_SCD_IA", "profesor.curs.scd.ia@utcn.ro", "Prof. dr. ing.");
+        Professor pRc = professor("Profesor_Curs_RC", "profesor.curs.rc@utcn.ro", "Conf. dr. ing.");
+        Professor pMp = professor("Profesor_Curs_MP", "profesor.curs.mp@utcn.ro", "Conf. dr. ing.");
+        Professor pMkt = professor("Profesor_Curs_MKT", "profesor.curs.mkt@utcn.ro", "Lect. dr.");
+        Professor pDpp = professor("Profesor_Curs_DPP", "profesor.curs.dpp@utcn.ro", "Lect. dr.");
 
         // --- Asistenti de laborator si proiect ---
-        Professor aMad = professor("Asistent_Lab_1", "asistent.lab1@utcn.ro", "Asist. drd. ing.");
-        Professor aMea = professor("Asistent_Lab_2", "asistent.lab2@utcn.ro", "Asist. drd. ing.");
-        Professor aScd = professor("Asistent_Lab_3", "asistent.lab3@utcn.ro", "Asist. dr. ing.");
-        Professor aFd = professor("Asistent_Lab_4", "asistent.lab4@utcn.ro", "Asist. drd. ing.");
-        Professor aScpc = professor("Asistent_Lab_5", "asistent.lab5@utcn.ro", "Asist. dr. ing.");
-        Professor aScr = professor("Asistent_Lab_6", "asistent.lab6@utcn.ro", "Asist. drd. ing.");
-        Professor aRc = professor("Asistent_Lab_7", "asistent.lab7@utcn.ro", "Asist. drd. ing.");
-        Professor aMp = professor("Asistent_Lab_8", "asistent.lab8@utcn.ro", "Asist. drd. ing.");
-        Professor prScd = professor("Asistent_Proiect_1", "asistent.proiect1@utcn.ro", "Asist. dr. ing.");
-        Professor prScpc = professor("Asistent_Proiect_2", "asistent.proiect2@utcn.ro", "Asist. dr. ing.");
-        Professor prScr = professor("Asistent_Proiect_3", "asistent.proiect3@utcn.ro", "Asist. drd. ing.");
+        Professor aMad = professor("Asistent_Lab_MAD", "asistent.lab.mad@utcn.ro", "Asist. drd. ing.");
+        Professor aMea = professor("Asistent_Lab_MEA", "asistent.lab.mea@utcn.ro", "Asist. drd. ing.");
+        Professor aScd = professor("Asistent_Lab_SCD", "asistent.lab.scd@utcn.ro", "Asist. dr. ing.");
+        Professor aFd = professor("Asistent_Lab_FD", "asistent.lab.fd@utcn.ro", "Asist. drd. ing.");
+        Professor aScpc = professor("Asistent_Lab_SCPC", "asistent.lab.scpc@utcn.ro", "Asist. dr. ing.");
+        Professor aScr = professor("Asistent_Lab_SCR", "asistent.lab.scr@utcn.ro", "Asist. drd. ing.");
+        Professor aRc = professor("Asistent_Lab_RC", "asistent.lab.rc@utcn.ro", "Asist. drd. ing.");
+        Professor aMp = professor("Asistent_Lab_MP", "asistent.lab.mp@utcn.ro", "Asist. drd. ing.");
+        Professor prScd = professor("Asistent_Proiect_SCD", "asistent.proiect.scd@utcn.ro", "Asist. dr. ing.");
+        Professor prScpc = professor("Asistent_Proiect_SCPC", "asistent.proiect.scpc@utcn.ro", "Asist. dr. ing.");
+        Professor prScr = professor("Asistent_Proiect_SCR", "asistent.proiect.scr@utcn.ro", "Asist. drd. ing.");
 
         // --- Cursuri (pe serie) ---
         course("MAD", pMad, seriesA);
@@ -222,16 +224,16 @@ public class DataSeeder implements CommandLineRunner {
         room("H11", somesDreapta, 120, RoomType.LECTURE_HALL);
 
         // Laboratoare
-        room("303", observator, 18, RoomType.LAB);
-        room("304", observator, 18, RoomType.LAB);
-        room("308", observator, 18, RoomType.LAB);
-        room("310", observator, 18, RoomType.LAB);
-        room("505B", observator, 18, RoomType.LAB);
-        room("7", observator, 18, RoomType.LAB);
-        room("G6", baritiu, 18, RoomType.LAB);
-        room("C12", dorobantilor, 18, RoomType.LAB);
-        room("C13", dorobantilor, 18, RoomType.LAB);
-        room("S3.5", somesStanga, 18, RoomType.LAB);
+        room("303", observator, 30, RoomType.LAB);
+        room("304", observator, 30, RoomType.LAB);
+        room("308", observator, 30, RoomType.LAB);
+        room("310", observator, 30, RoomType.LAB);
+        room("505B", observator, 30, RoomType.LAB);
+        room("7", observator, 30, RoomType.LAB);
+        room("G6", baritiu, 30, RoomType.LAB);
+        room("C12", dorobantilor, 30, RoomType.LAB);
+        room("C13", dorobantilor, 30, RoomType.LAB);
+        room("S3.5", somesStanga, 30, RoomType.LAB);
     }
 
     private void seedDisciplines() {
@@ -308,7 +310,8 @@ public class DataSeeder implements CommandLineRunner {
             Subgroup sg = new Subgroup();
             sg.setName(code + "/" + i);
             sg.setGroup(g);
-            sg.setStudentCount(subgroupCount == 1 ? 18 : 14);
+            // O grupa are 28 de studenti, impartiti egal intre semigrupe
+            sg.setStudentCount(STUDENTS_PER_GROUP / subgroupCount);
             result.add(subgroupRepository.save(sg));
         }
         return result;

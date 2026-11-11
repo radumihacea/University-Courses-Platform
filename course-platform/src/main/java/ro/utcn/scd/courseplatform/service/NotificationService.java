@@ -6,8 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.utcn.scd.courseplatform.dto.NotificationDto;
 import ro.utcn.scd.courseplatform.model.Notification;
+import ro.utcn.scd.courseplatform.model.User;
 import ro.utcn.scd.courseplatform.repository.NotificationRepository;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -65,5 +68,18 @@ public class NotificationService {
     public void delete(Long id) {
         repository.delete(lookup.notification(id));
         repository.flush();
+    }
+
+    /** Trimite acelasi mesaj mai multor utilizatori (ex: la publicarea orarului). */
+    public void notifyUsers(Collection<User> users, String message) {
+        List<Notification> notifications = new ArrayList<>();
+        for (User user : users) {
+            Notification n = new Notification();
+            n.setUser(user);
+            n.setMessage(message);
+            n.setRead(false);
+            notifications.add(n);
+        }
+        repository.saveAll(notifications);
     }
 }

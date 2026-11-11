@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ro.utcn.scd.courseplatform.dto.ChangeRequestDto;
+import ro.utcn.scd.courseplatform.dto.DecisionDto;
 import ro.utcn.scd.courseplatform.model.enums.RequestStatus;
 import ro.utcn.scd.courseplatform.service.ChangeRequestService;
 
@@ -38,6 +39,17 @@ public class ChangeRequestController {
     @PutMapping("/{id}")
     public ChangeRequestDto update(@PathVariable Long id, @Valid @RequestBody ChangeRequestDto dto) {
         return service.update(id, dto);
+    }
+
+    /** Aproba cererea: verifica conflictele, muta ora si notifica profesorul si studentii. */
+    @PostMapping("/{id}/approve")
+    public ChangeRequestDto approve(@PathVariable Long id, @Valid @RequestBody(required = false) DecisionDto decision) {
+        return service.approve(id, decision);
+    }
+
+    @PostMapping("/{id}/reject")
+    public ChangeRequestDto reject(@PathVariable Long id, @Valid @RequestBody(required = false) DecisionDto decision) {
+        return service.reject(id, decision);
     }
 
     @DeleteMapping("/{id}")

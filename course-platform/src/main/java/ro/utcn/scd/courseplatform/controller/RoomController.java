@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ro.utcn.scd.courseplatform.dto.RoomDto;
 import ro.utcn.scd.courseplatform.model.enums.RoomType;
+import ro.utcn.scd.courseplatform.model.enums.WeekParity;
 import ro.utcn.scd.courseplatform.service.RoomService;
 
 import java.util.List;
@@ -22,6 +23,19 @@ public class RoomController {
     public List<RoomDto> getAll(@RequestParam(required = false) RoomType type,
                                 @RequestParam(required = false) Long buildingId) {
         return service.findAll(type, buildingId);
+    }
+
+    /**
+     * Salile libere intr-un slot al unui orar.
+     * Ex: GET /api/rooms/available?timetableId=1&timeSlotId=10&parity=ODD&minCapacity=15&type=LAB
+     */
+    @GetMapping("/available")
+    public List<RoomDto> getAvailable(@RequestParam Long timetableId,
+                                      @RequestParam Long timeSlotId,
+                                      @RequestParam(defaultValue = "ALL") WeekParity parity,
+                                      @RequestParam(defaultValue = "0") int minCapacity,
+                                      @RequestParam(required = false) RoomType type) {
+        return service.findAvailable(timetableId, timeSlotId, parity, minCapacity, type);
     }
 
     @GetMapping("/{id}")

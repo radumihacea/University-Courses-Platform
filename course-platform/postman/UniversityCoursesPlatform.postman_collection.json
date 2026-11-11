@@ -1524,7 +1524,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduleEntryId\": 1,\n  \"professorId\": 15,\n  \"proposedTimeSlotId\": 10,\n  \"proposedRoomId\": 14,\n  \"reason\": \"Am o conferinta in acel interval.\"\n}"
+              "raw": "{\n  \"scheduleEntryId\": {{entryId}},\n  \"professorId\": 15,\n  \"proposedTimeSlotId\": 30,\n  \"proposedRoomId\": 14,\n  \"reason\": \"Am o conferinta in acel interval.\"\n}"
             }
           },
           "event": [
@@ -1564,7 +1564,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduleEntryId\": 1,\n  \"professorId\": 15,\n  \"proposedTimeSlotId\": 11,\n  \"proposedRoomId\": 14,\n  \"reason\": \"Am o conferinta in acel interval.\"\n}"
+              "raw": "{\n  \"scheduleEntryId\": {{entryId}},\n  \"professorId\": 15,\n  \"proposedTimeSlotId\": 30,\n  \"proposedRoomId\": 14,\n  \"reason\": \"Am o conferinta in acel interval.\"\n}"
             }
           }
         },
@@ -1587,7 +1587,7 @@
           }
         }
       ],
-      "description": "Crearea va functiona dupa ce generam orarul (are nevoie de un scheduleEntryId existent)."
+      "description": "Ruleaza intai folderul 'Orar si operatii complexe' (pana la pasul 14), care salveaza un entryId valid."
     },
     {
       "name": "Notificari",
@@ -1792,6 +1792,475 @@
               "path": [
                 "api",
                 "semester-weeks"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orar si operatii complexe",
+      "description": "Ruleaza cererile in ordine: generare -> verificari -> publicare -> orar personal -> cerere de mutare -> aprobare.",
+      "item": [
+        {
+          "name": "1. Genereaza orarul",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables",
+                "generate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Orar AIA an IV - generat automat\",\n  \"academicYear\": \"2026-2027\",\n  \"semester\": 1,\n  \"attempts\": 30,\n  \"seed\": 42\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('timetableId', pm.response.json().timetable.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Lista orarelor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Conflicte (ar trebui sa fie lista goala)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables/{{timetableId}}/conflicts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables",
+                "{{timetableId}}",
+                "conflicts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Orarul semigrupei 30141/1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables/{{timetableId}}/entries?subgroupId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables",
+                "{{timetableId}}",
+                "entries"
+              ],
+              "query": [
+                {
+                  "key": "subgroupId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Orarul profesorului Profesor_Curs_SCD_A",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables/{{timetableId}}/entries?professorId=4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables",
+                "{{timetableId}}",
+                "entries"
+              ],
+              "query": [
+                {
+                  "key": "professorId",
+                  "value": "4"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Orarul salii G6",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables/{{timetableId}}/entries?roomId=14",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables",
+                "{{timetableId}}",
+                "entries"
+              ],
+              "query": [
+                {
+                  "key": "roomId",
+                  "value": "14"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "7. Sali de laborator libere vineri 8-10, sapt. impare",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rooms/available?timetableId={{timetableId}}&timeSlotId=29&parity=ODD&minCapacity=15&type=LAB",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rooms",
+                "available"
+              ],
+              "query": [
+                {
+                  "key": "timetableId",
+                  "value": "{{timetableId}}"
+                },
+                {
+                  "key": "timeSlotId",
+                  "value": "29"
+                },
+                {
+                  "key": "parity",
+                  "value": "ODD"
+                },
+                {
+                  "key": "minCapacity",
+                  "value": "15"
+                },
+                {
+                  "key": "type",
+                  "value": "LAB"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Statistica: incarcarea profesorilor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/statistics/professor-load?timetableId={{timetableId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "statistics",
+                "professor-load"
+              ],
+              "query": [
+                {
+                  "key": "timetableId",
+                  "value": "{{timetableId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "9. Statistica: ocuparea salilor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/statistics/room-occupancy?timetableId={{timetableId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "statistics",
+                "room-occupancy"
+              ],
+              "query": [
+                {
+                  "key": "timetableId",
+                  "value": "{{timetableId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "10. Publica orarul",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables/{{timetableId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables",
+                "{{timetableId}}",
+                "publish"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11. Orarul de joi 12.11.2026 pentru Student_1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/students/1/day?date=2026-11-12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "schedule",
+                "students",
+                "1",
+                "day"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-11-12"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "12. Orarul saptamanal pentru Student_1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/students/1/week",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "schedule",
+                "students",
+                "1",
+                "week"
+              ]
+            }
+          }
+        },
+        {
+          "name": "13. Orarul de joi 12.11.2026 pentru Asistent_Lab_SCD",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/professors/15/day?date=2026-11-12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "schedule",
+                "professors",
+                "15",
+                "day"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-11-12"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "14. Orele lui Asistent_Lab_SCD (salveaza primul id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/timetables/{{timetableId}}/entries?professorId=15",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "timetables",
+                "{{timetableId}}",
+                "entries"
+              ],
+              "query": [
+                {
+                  "key": "professorId",
+                  "value": "15"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const list = pm.response.json();",
+                  "if (list.length > 0) {",
+                  "  pm.collectionVariables.set('entryId', list[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15. Cerere de mutare in vineri 8-10",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/change-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "change-requests"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleEntryId\": {{entryId}},\n  \"professorId\": 15,\n  \"proposedTimeSlotId\": 29,\n  \"reason\": \"Am o conferinta in intervalul actual.\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('changeRequestId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16. Aproba cererea (verifica conflictele si muta ora)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/change-requests/{{changeRequestId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "change-requests",
+                "{{changeRequestId}}",
+                "approve"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminComment\": \"Aprobat, sala G6 este libera.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "17. Notificarile necitite ale lui Student_1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications?userId=25&unreadOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "25"
+                },
+                {
+                  "key": "unreadOnly",
+                  "value": "true"
+                }
               ]
             }
           }

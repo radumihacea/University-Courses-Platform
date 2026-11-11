@@ -1,6 +1,7 @@
 package ro.utcn.scd.courseplatform.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ro.utcn.scd.courseplatform.model.ChangeRequest;
@@ -17,4 +18,11 @@ public interface ChangeRequestRepository extends JpaRepository<ChangeRequest, Lo
             order by c.createdAt desc
             """)
     List<ChangeRequest> search(@Param("status") RequestStatus status, @Param("professorId") Long professorId);
+
+    @Modifying
+    @Query("""
+            delete from ChangeRequest c
+            where c.scheduleEntry.id in (select e.id from ScheduleEntry e where e.timetable.id = :timetableId)
+            """)
+    void deleteAllOfTimetable(@Param("timetableId") Long timetableId);
 }
