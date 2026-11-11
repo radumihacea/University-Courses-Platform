@@ -1,6 +1,7 @@
 package ro.utcn.scd.courseplatform.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,14 +9,15 @@ import ro.utcn.scd.courseplatform.dto.NotificationDto;
 import ro.utcn.scd.courseplatform.model.Notification;
 import ro.utcn.scd.courseplatform.model.User;
 import ro.utcn.scd.courseplatform.repository.NotificationRepository;
+import ro.utcn.scd.courseplatform.websocket.NotificationsCreatedEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * CRUD pe notificari. Deocamdata se salveaza doar in baza de date;
- * la pasul cu WebSocket le vom trimite si live catre aplicatii.
+ * CRUD pe notificari. Fiecare notificare noua se salveaza in baza de date
+ * si apoi (dupa commit) se trimite live prin WebSocket catre destinatar.
  */
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class NotificationService {
 
     private final NotificationRepository repository;
     private final EntityLookup lookup;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<NotificationDto> findAll(Long userId, boolean unreadOnly) {
@@ -48,14 +51,16 @@ public class NotificationService {
         n.setUser(lookup.user(dto.userId()));
         n.setMessage(dto.message());
         n.setRead(false);
-        return NotificationDto.from(repository.saveAndFlush(n));
+        NotificationDto saved = NotificationDto.from(repository.saveAndFlush(n));
+        eventPublisher.publishEvent(new NotificationsCreatedEvent(List.of(saved)));
+        return saved;
     }
 
     public NotificationDto update(Long id, NotificationDto dto) {
         Notification n = lookup.notification(id);
         n.setUser(lookup.user(dto.userId()));
         n.setMessage(dto.message());
-        n.setRead(dto.read());
+        n.setRead(Boolean.TRUE.equals(dto.read()));
         return NotificationDto.from(repository.saveAndFlush(n));
     }
 
@@ -80,6 +85,9 @@ public class NotificationService {
             n.setRead(false);
             notifications.add(n);
         }
-        repository.saveAll(notifications);
+        List<NotificationDto> saved = repository.saveAll(notifications).stream()
+                .map(NotificationDto::from)
+                .toList();
+        eventPublisher.publishEvent(new NotificationsCreatedEvent(saved));
     }
 }

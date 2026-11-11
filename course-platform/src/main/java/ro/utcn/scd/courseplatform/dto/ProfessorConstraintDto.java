@@ -12,7 +12,7 @@ public record ProfessorConstraintDto(
         @NotNull Long timeSlotId,
         String timeSlotLabel,
         @NotNull ConstraintType type,
-        boolean mandatory,
+        Boolean mandatory,
         @Size(max = 1000) String originalText
 ) {
     public static ProfessorConstraintDto from(ProfessorConstraint c) {

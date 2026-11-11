@@ -7,7 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import ro.utcn.scd.courseplatform.dto.NotificationDto;
 import ro.utcn.scd.courseplatform.service.NotificationService;
 
+import ro.utcn.scd.courseplatform.websocket.NotificationWebSocketHandler;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -15,6 +18,14 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService service;
+    private final NotificationWebSocketHandler webSocketHandler;
+
+    /** Cati utilizatori sunt conectati acum prin WebSocket (util la demonstratie). */
+    @GetMapping("/online")
+    public Map<String, Integer> online() {
+        return Map.of("onlineUsers", webSocketHandler.onlineUsers(),
+                "openConnections", webSocketHandler.onlineConnections());
+    }
 
     /** Ex: GET /api/notifications?userId=30&unreadOnly=true */
     @GetMapping

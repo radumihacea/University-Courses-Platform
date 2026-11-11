@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,6 +35,17 @@ public class GlobalExceptionHandler {
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .toList();
         return build(HttpStatus.BAD_REQUEST, "Datele trimise nu sunt valide.", details);
+    }
+
+    /** JSON invalid sau cu tipuri gresite (ex: text in loc de numar, valoare enum inexistenta). */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex) {
+        String cause = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+        if (cause != null && cause.length() > 300) {
+            cause = cause.substring(0, 300) + "...";
+        }
+        return build(HttpStatus.BAD_REQUEST, "Corpul cererii (JSON) nu poate fi citit.",
+                cause != null ? List.of(cause) : List.of());
     }
 
     /** Erori de validare pe entitati (ex: @AssertTrue din TeachingAssignment). */

@@ -13,7 +13,7 @@ public record DisciplineDto(
         @NotBlank @Size(max = 150) String name,
         @NotNull @Min(1) @Max(30) Integer credits,
         @NotNull @Min(1) @Max(6) Integer studyYear,
-        boolean optional
+        Boolean optional
 ) {
     public static DisciplineDto from(Discipline d) {
         return new DisciplineDto(d.getId(), d.getCode(), d.getName(), d.getCredits(),

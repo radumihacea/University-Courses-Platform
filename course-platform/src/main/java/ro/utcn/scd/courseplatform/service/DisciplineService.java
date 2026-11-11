@@ -49,6 +49,6 @@ public class DisciplineService {
         d.setName(dto.name());
         d.setCredits(dto.credits());
         d.setStudyYear(dto.studyYear());
-        d.setOptional(dto.optional());
+        d.setOptional(Boolean.TRUE.equals(dto.optional()));
     }
 }

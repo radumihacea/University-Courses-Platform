@@ -11,7 +11,7 @@ public record NotificationDto(
         Long id,
         @NotNull Long userId,
         @NotBlank @Size(max = 500) String message,
-        boolean read,
+        Boolean read,
         LocalDateTime createdAt
 ) {
     public static NotificationDto from(Notification n) {

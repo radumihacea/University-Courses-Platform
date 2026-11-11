@@ -51,7 +51,7 @@ public class ProfessorConstraintService {
         c.setProfessor(lookup.professor(dto.professorId()));
         c.setTimeSlot(lookup.timeSlot(dto.timeSlotId()));
         c.setType(dto.type());
-        c.setMandatory(dto.mandatory());
+        c.setMandatory(Boolean.TRUE.equals(dto.mandatory()));
         c.setOriginalText(dto.originalText());
     }
 }

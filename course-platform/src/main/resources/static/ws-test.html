@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Test notificari live (WebSocket)</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; color: #222; }
+        h1 { font-size: 22px; }
+        .row { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+        input { padding: 6px 8px; width: 90px; }
+        button { padding: 6px 14px; cursor: pointer; }
+        #status { font-weight: 600; }
+        .ok { color: #1b7f3b; } .off { color: #b3261e; }
+        #log { list-style: none; padding: 0; }
+        #log li { border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+        #log li.notification { border-color: #1b7f3b; background: #f1faf3; }
+        small { color: #666; }
+    </style>
+</head>
+<body>
+<h1>Test notificari live (WebSocket)</h1>
+<p>Conecteaza-te ca un utilizator, apoi - din Postman - publica un orar, aproba o cerere
+    sau creeaza o notificare pentru acel utilizator. Mesajul apare aici instant, fara refresh.</p>
+
+<div class="row">
+    <label>userId: <input id="userId" type="number" value="25"></label>
+    <button id="connect">Conecteaza</button>
+    <button id="disconnect" disabled>Deconecteaza</button>
+    <span id="status" class="off">Deconectat</span>
+</div>
+
+<ul id="log"></ul>
+
+<script>
+    let socket = null;
+    const log = document.getElementById('log');
+    const status = document.getElementById('status');
+
+    function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+    function add(text, cls) {
+        const li = document.createElement('li');
+        if (cls) li.className = cls;
+        li.innerHTML = text;
+        log.prepend(li);
+    }
+
+    function setConnected(connected) {
+        status.textContent = connected ? 'Conectat' : 'Deconectat';
+        status.className = connected ? 'ok' : 'off';
+        document.getElementById('connect').disabled = connected;
+        document.getElementById('disconnect').disabled = !connected;
+    }
+
+    document.getElementById('connect').onclick = () => {
+        const userId = document.getElementById('userId').value;
+        socket = new WebSocket(`ws://${location.host}/ws/notifications?userId=${userId}`);
+        socket.onopen = () => setConnected(true);
+        socket.onclose = (e) => {
+            setConnected(false);
+            add(esc(`Conexiune inchisa${e.reason ? ': ' + e.reason : ''}`));
+        };
+        socket.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data.type === 'NOTIFICATION') {
+                add(`<strong>${esc(data.message)}</strong><br><small>notificarea #${esc(String(data.id))} - ${esc(data.createdAt)}</small>`, 'notification');
+            } else {
+                add(esc(data.message || data.type));
+            }
+        };
+    };
+
+    document.getElementById('disconnect').onclick = () => socket && socket.close();
+</script>
+</body>
+</html>
