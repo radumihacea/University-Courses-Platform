@@ -1,0 +1,5 @@
+# Fisiere de sistem / editor la nivelul intregului proiect
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log

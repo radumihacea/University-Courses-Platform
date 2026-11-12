@@ -1,0 +1,94 @@
+/* Stiluri globale - completeaza tema Vuetify */
+
+html,
+body,
+.v-application {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Butoane fara MAJUSCULE, mai aerisite */
+.v-btn {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+}
+
+/* Titlurile coloanelor din tabele: mai discrete */
+.v-data-table .v-data-table__th {
+  font-weight: 600 !important;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+/* Carduri: fara tranzitii de umbra, contur discret */
+.v-card {
+  border-color: rgba(var(--v-border-color), 0.12) !important;
+}
+
+/* Scrollbar discret */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--v-theme-on-surface), 0.18);
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------------
+   Efect de "vibratie" la hover pe elementele mici si colorate:
+   sigla, iconitele colorate (v-avatar), etichetele (v-chip),
+   butoanele-iconita si orele din grila orarului.
+   ------------------------------------------------------------------ */
+@keyframes ucp-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  20% {
+    transform: rotate(-6deg) scale(1.06);
+  }
+  40% {
+    transform: rotate(5deg) scale(1.06);
+  }
+  60% {
+    transform: rotate(-3deg) scale(1.04);
+  }
+  80% {
+    transform: rotate(2deg) scale(1.02);
+  }
+}
+
+@keyframes ucp-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-2px);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  60% {
+    transform: translateX(-1px);
+  }
+  80% {
+    transform: translateX(1px);
+  }
+}
+
+/* Respectam setarea sistemului "reduce motion" (accesibilitate) */
+@media (prefers-reduced-motion: no-preference) {
+  .v-avatar:hover,
+  .v-btn--icon:hover .v-icon,
+  .v-chip:hover {
+    animation: ucp-wiggle 0.45s ease-in-out;
+  }
+
+  .tt-entry:hover {
+    animation: ucp-shake 0.35s ease-in-out;
+  }
+}

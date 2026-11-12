@@ -9,9 +9,11 @@ import ro.utcn.scd.courseplatform.dto.TimeSlotDto;
 import ro.utcn.scd.courseplatform.exception.BadRequestException;
 import ro.utcn.scd.courseplatform.model.*;
 import ro.utcn.scd.courseplatform.model.enums.RequestStatus;
+import ro.utcn.scd.courseplatform.model.enums.Role;
 import ro.utcn.scd.courseplatform.model.enums.TimetableStatus;
 import ro.utcn.scd.courseplatform.repository.ChangeRequestRepository;
 import ro.utcn.scd.courseplatform.repository.StudentRepository;
+import ro.utcn.scd.courseplatform.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class ChangeRequestService {
 
     private final ChangeRequestRepository repository;
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
     private final ScheduleConflictService conflictService;
     private final AudienceResolver audienceResolver;
     private final NotificationService notificationService;
@@ -43,11 +46,18 @@ public class ChangeRequestService {
         return ChangeRequestDto.from(lookup.changeRequest(id));
     }
 
+    /** Creeaza cererea si anunta live toti adminii ca au o cerere noua de analizat. */
     public ChangeRequestDto create(ChangeRequestDto dto) {
         ChangeRequest c = new ChangeRequest();
         c.setStatus(RequestStatus.PENDING);
         apply(c, dto);
-        return ChangeRequestDto.from(repository.saveAndFlush(c));
+        ChangeRequestDto saved = ChangeRequestDto.from(repository.saveAndFlush(c));
+
+        notificationService.notifyUsers(userRepository.findByRoleIn(List.of(Role.ADMIN)),
+                "Cerere noua de la " + saved.professorName() + ": " + saved.disciplineCode() + " "
+                        + saved.activityType() + " (" + saved.targetName() + ") din "
+                        + saved.currentTimeSlotLabel() + " in " + saved.proposedTimeSlotLabel() + ".");
+        return saved;
     }
 
     public ChangeRequestDto update(Long id, ChangeRequestDto dto) {
