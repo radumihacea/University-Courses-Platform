@@ -53,7 +53,7 @@ const shortcuts = [
   { title: 'Orar', subtitle: 'Generează și publică', icon: 'mdi-calendar-month-outline', to: '/orar' },
   { title: 'Cereri', subtitle: 'Aprobă sau respinge', icon: 'mdi-swap-horizontal', to: '/cereri' },
   { title: 'Asignări', subtitle: 'Ce se predă și cui', icon: 'mdi-clipboard-list-outline', to: '/asignari' },
-  { title: 'Statistici', subtitle: 'Profesori și săli', icon: 'mdi-chart-box-outline', to: '/statistici' },
+  { title: 'Asistent AI', subtitle: 'Chatbot pentru orar', icon: 'mdi-robot-happy-outline', to: '/asistent' },
 ]
 
 onMounted(async () => {

@@ -46,6 +46,12 @@ const router = createRouter({
           meta: { title: 'Statistici', icon: 'mdi-chart-box-outline', group: 'Orar' },
         },
         {
+          path: 'asistent',
+          name: 'assistant',
+          component: () => import('@/views/AssistantView.vue'),
+          meta: { title: 'Asistent AI', icon: 'mdi-robot-happy-outline', group: 'Orar' },
+        },
+        {
           path: 'asignari',
           name: 'assignments',
           component: () => import('@/views/AssignmentsView.vue'),

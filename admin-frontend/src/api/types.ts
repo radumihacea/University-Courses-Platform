@@ -242,6 +242,35 @@ export interface AuthSession {
   studentId: Id | null
 }
 
+/** Un mesaj din conversatia cu asistentul AI. */
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export interface ChatResult {
+  answer: string
+  model: string
+  subject: string
+  durationMs: number
+}
+
+/** Ultimul rand din raspunsul cu streaming (/api/ai/chat/stream). */
+export interface ChatStreamDone {
+  model: string
+  subject: string
+  durationMs: number
+  /** dupa cat timp a aparut primul cuvant */
+  firstTokenMs: number | null
+}
+
+export interface AiStatus {
+  ollamaRunning: boolean
+  model: string
+  modelReady: boolean
+  installedModels: string[]
+}
+
 /** Mesajul primit prin WebSocket. */
 export interface LiveMessage {
   type: 'CONNECTED' | 'NOTIFICATION' | 'PONG'

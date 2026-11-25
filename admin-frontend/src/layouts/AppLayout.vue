@@ -45,6 +45,7 @@ const mainItems = [
   { title: 'Orar', icon: 'mdi-calendar-month-outline', to: '/orar' },
   { title: 'Cereri', icon: 'mdi-swap-horizontal', to: '/cereri', badge: true },
   { title: 'Statistici', icon: 'mdi-chart-box-outline', to: '/statistici' },
+  { title: 'Asistent AI', icon: 'mdi-robot-happy-outline', to: '/asistent' },
   { title: 'Notificări', icon: 'mdi-bell-outline', to: '/notificari' },
 ]
 
