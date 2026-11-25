@@ -41,7 +41,16 @@ const nextStep = computed(() => {
     return { icon: 'mdi-auto-fix', color: 'primary', text: 'Nu există încă niciun orar. Generează primul orar.', to: '/orar', action: 'Generează' }
   }
   if (latest.value.status === 'DRAFT') {
-    return { icon: 'mdi-publish', color: 'warning', text: `Orarul „${latest.value.name}” este ciornă. Verifică-l și publică-l.`, to: '/orar', action: 'Deschide' }
+    return {
+      icon: 'mdi-publish',
+      color: 'warning',
+      text: published.value
+        ? `Ai o versiune nouă de orar, „${latest.value.name}”, încă ciornă. Verifică-o și publică-o.`
+        : `Orarul „${latest.value.name}” este ciornă. Verifică-l și publică-l.`,
+      // deschide pagina Orar direct pe aceasta versiune, unde e butonul de publicare
+      to: { path: '/orar', query: { id: String(latest.value.id) } },
+      action: 'Deschide',
+    }
   }
   if (pending.value.length) {
     return { icon: 'mdi-swap-horizontal', color: 'info', text: `Ai ${pending.value.length} cereri de modificare de analizat.`, to: '/cereri', action: 'Vezi cererile' }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { errorMessage } from '@/api/http'
 import { scheduleApi } from '@/api/schedule'
@@ -23,6 +24,7 @@ import {
 
 const toast = useToast()
 const lookups = useLookups()
+const route = useRoute()
 
 // ---------------------------------------------------------------- orare
 const timetables = ref<Timetable[]>([])
@@ -43,8 +45,11 @@ async function loadTimetables(selectId?: number) {
     if (selectId !== undefined) {
       selectedId.value = selectId
     } else if (!timetables.value.some((t) => t.id === selectedId.value)) {
-      const published = timetables.value.find((t) => t.status === 'PUBLISHED')
-      selectedId.value = published?.id ?? timetables.value[0]?.id ?? null
+      // implicit: versiunea ceruta in adresa (?id=, de pe pagina Acasa), altfel cea mai noua
+      const fromRoute = Number(route.query.id)
+      selectedId.value = timetables.value.some((t) => t.id === fromRoute)
+        ? fromRoute
+        : (timetables.value[0]?.id ?? null)
     }
   } catch (e) {
     toast.error(errorMessage(e))
@@ -285,6 +290,29 @@ onMounted(async () => {
     </v-card>
 
     <template v-else-if="selected">
+      <!-- Ciorna: studentii nu o vad pana nu e publicata -->
+      <v-alert
+        v-if="selected.status === 'DRAFT'"
+        type="warning"
+        variant="tonal"
+        rounded="lg"
+        icon="mdi-file-document-edit-outline"
+        class="mb-4"
+      >
+        <div class="d-flex flex-wrap align-center ga-3">
+          <div class="flex-grow-1">
+            <div class="font-weight-bold">Această versiune este ciornă</div>
+            <div class="text-body-2">
+              Studenții și profesorii nu o văd încă.
+              {{ conflicts.length ? `Are ${conflicts.length} conflicte de rezolvat înainte de publicare.` : 'Nu are conflicte și poate fi publicată.' }}
+            </div>
+          </div>
+          <v-btn color="success" variant="flat" prepend-icon="mdi-publish" @click="publishDialog = true">
+            Publică orarul
+          </v-btn>
+        </div>
+      </v-alert>
+
       <!-- Carduri sumar -->
       <v-row class="mb-2">
         <v-col cols="12" sm="6" lg="3">
