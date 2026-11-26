@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.utcn.scd.courseplatform.dto.ChangeRequestDto;
+import ro.utcn.scd.courseplatform.dto.MoveOptionDto;
 import ro.utcn.scd.courseplatform.dto.DecisionDto;
 import ro.utcn.scd.courseplatform.dto.TimeSlotDto;
 import ro.utcn.scd.courseplatform.exception.BadRequestException;
@@ -72,6 +73,12 @@ public class ChangeRequestService {
         ensurePending(c);
         repository.delete(c);
         repository.flush();
+    }
+
+    /** Unde poate fi mutata o ora (sloturi si sali libere) - pentru formularul de cerere din aplicatia mobila. */
+    @Transactional(readOnly = true)
+    public List<MoveOptionDto> moveOptions(Long scheduleEntryId) {
+        return conflictService.moveOptions(lookup.scheduleEntry(scheduleEntryId));
     }
 
     /**

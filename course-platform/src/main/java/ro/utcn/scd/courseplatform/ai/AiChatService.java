@@ -24,6 +24,7 @@ import ro.utcn.scd.courseplatform.service.TimetableService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -58,6 +59,7 @@ public class AiChatService {
 
     private final OllamaClient ollama;
     private final ScheduleContextBuilder contextBuilder;
+    private final QuickAnswers quickAnswers;
     private final PersonalScheduleService personalScheduleService;
     private final TimetableService timetableService;
     private final TimetableRepository timetableRepository;
@@ -66,13 +68,14 @@ public class AiChatService {
     private final EntityLookup lookup;
     private final TransactionTemplate readOnlyTx;
 
-    public AiChatService(OllamaClient ollama, ScheduleContextBuilder contextBuilder,
+    public AiChatService(OllamaClient ollama, ScheduleContextBuilder contextBuilder, QuickAnswers quickAnswers,
                          PersonalScheduleService personalScheduleService, TimetableService timetableService,
                          TimetableRepository timetableRepository, StudentRepository studentRepository,
                          ProfessorRepository professorRepository, EntityLookup lookup,
                          PlatformTransactionManager transactionManager) {
         this.ollama = ollama;
         this.contextBuilder = contextBuilder;
+        this.quickAnswers = quickAnswers;
         this.personalScheduleService = personalScheduleService;
         this.timetableService = timetableService;
         this.timetableRepository = timetableRepository;
@@ -87,8 +90,12 @@ public class AiChatService {
     private record Subject(String description, List<ScheduleEntryDto> week, boolean showAudience) {
     }
 
-    private record Prepared(String subject, String context) {
+    /** quick = raspunsul instant din orar (gol daca intrebarea trebuie trimisa modelului AI). */
+    private record Prepared(String subject, String context, Optional<String> quick) {
     }
+
+    /** Numele afisat in loc de model cand raspunsul vine direct din orar. */
+    public static final String QUICK_MODEL = "răspuns instant din orar";
 
     /** Raspunsul intreg, dintr-o data (folosit de aplicatia mobila si de Postman). */
     public ChatResponse chat(AuthUser user, ChatRequest request) {
@@ -107,11 +114,26 @@ public class AiChatService {
         long start = System.currentTimeMillis();
         // Datele se citesc intr-o tranzactie scurta; apelul catre model (care poate dura)
         // se face dupa ce tranzactia s-a inchis, ca sa nu tina ocupata o conexiune la baza de date.
+        LocalDate today = LocalDate.now();
         Prepared prepared = readOnlyTx.execute(status -> {
             Subject subject = resolveSubject(user, request);
-            return new Prepared(subject.description(),
-                    contextBuilder.build(subject.description(), subject.week(), LocalDate.now(), subject.showAudience()));
+            // Intrebarile simple ("ce ore am miercuri?", "unde e laboratorul de SCD?") primesc raspuns
+            // instant, direct din orar; doar cele mai complicate ajung la modelul AI.
+            Optional<String> quick = quickAnswers.answer(request.message(), subject.week(), today, subject.showAudience());
+            String context = quick.isPresent() ? null
+                    : contextBuilder.build(subject.description(), subject.week(), today, subject.showAudience());
+            return new Prepared(subject.description(), context, quick);
         });
+
+        Optional<String> quick = prepared.quick();
+        if (quick.isPresent()) {
+            if (onToken != null) {
+                onToken.accept(quick.get());
+            }
+            long duration = System.currentTimeMillis() - start;
+            log.info("Asistent AI ({}): \"{}\" -> raspuns instant din orar in {} ms", prepared.subject(), request.message(), duration);
+            return new ChatResponse(quick.get(), QUICK_MODEL, prepared.subject(), duration);
+        }
 
         // Mesajul "system" este identic intre intrebarile aceleiasi persoane din aceeasi zi, asa ca
         // Ollama il refoloseste din memorie (cache) si intrebarile urmatoare incep sa raspunda mai repede.

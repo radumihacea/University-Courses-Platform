@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_today"
+        android:icon="@drawable/ic_today"
+        android:title="Azi" />
+    <item
+        android:id="@+id/nav_week"
+        android:icon="@drawable/ic_week"
+        android:title="Săptămâna" />
+    <item
+        android:id="@+id/nav_chat"
+        android:icon="@drawable/ic_robot"
+        android:title="Asistent" />
+    <item
+        android:id="@+id/nav_notifications"
+        android:icon="@drawable/ic_notifications"
+        android:title="Notificări" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_person"
+        android:title="Cont" />
+</menu>

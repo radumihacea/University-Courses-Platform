@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ro.utcn.scd.courseplatform.dto.ChangeRequestDto;
+import ro.utcn.scd.courseplatform.dto.MoveOptionDto;
 import ro.utcn.scd.courseplatform.dto.DecisionDto;
 import ro.utcn.scd.courseplatform.model.enums.RequestStatus;
 import ro.utcn.scd.courseplatform.service.ChangeRequestService;
@@ -23,6 +24,12 @@ public class ChangeRequestController {
     public List<ChangeRequestDto> getAll(@RequestParam(required = false) RequestStatus status,
                                          @RequestParam(required = false) Long professorId) {
         return service.findAll(status, professorId);
+    }
+
+    /** Ex: GET /api/change-requests/move-options?scheduleEntryId=12 - sloturile si salile in care se poate muta ora. */
+    @GetMapping("/move-options")
+    public List<MoveOptionDto> moveOptions(@RequestParam Long scheduleEntryId) {
+        return service.moveOptions(scheduleEntryId);
     }
 
     @GetMapping("/{id}")

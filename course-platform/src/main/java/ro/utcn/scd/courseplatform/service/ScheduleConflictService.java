@@ -4,12 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.utcn.scd.courseplatform.dto.ConflictDto;
+import ro.utcn.scd.courseplatform.dto.MoveOptionDto;
+import ro.utcn.scd.courseplatform.dto.RoomDto;
 import ro.utcn.scd.courseplatform.dto.TimeSlotDto;
 import ro.utcn.scd.courseplatform.model.*;
+import ro.utcn.scd.courseplatform.model.enums.ActivityType;
 import ro.utcn.scd.courseplatform.model.enums.ConstraintType;
+import ro.utcn.scd.courseplatform.model.enums.RoomType;
 import ro.utcn.scd.courseplatform.model.enums.WeekParity;
 import ro.utcn.scd.courseplatform.repository.ProfessorConstraintRepository;
+import ro.utcn.scd.courseplatform.repository.RoomRepository;
 import ro.utcn.scd.courseplatform.repository.ScheduleEntryRepository;
+import ro.utcn.scd.courseplatform.repository.TimeSlotRepository;
 
 import java.util.*;
 
@@ -25,6 +31,8 @@ public class ScheduleConflictService {
     private final ScheduleEntryRepository entryRepository;
     private final ProfessorConstraintRepository constraintRepository;
     private final AudienceResolver audienceResolver;
+    private final TimeSlotRepository timeSlotRepository;
+    private final RoomRepository roomRepository;
 
     /** Toate conflictele dintr-un orar: sala, profesor, studenti si capacitate. */
     public List<ConflictDto> findConflicts(Long timetableId) {
@@ -111,6 +119,72 @@ public class ScheduleConflictService {
             }
         }
         return problems;
+    }
+
+    /**
+     * Unde poate fi mutata o ora: toate sloturile in care profesorul si studentii sunt liberi
+     * (si profesorul nu e indisponibil), fiecare cu salile potrivite (tip, capacitate) libere atunci.
+     * Folosit de aplicatia mobila cand profesorul face o cerere de mutare.
+     */
+    public List<MoveOptionDto> moveOptions(ScheduleEntry entry) {
+        TeachingAssignment assignment = entry.getAssignment();
+        Long professorId = assignment.getProfessor().getId();
+        AudienceResolver.Resolver resolver = audienceResolver.create();
+        AudienceResolver.Audience audience = resolver.of(assignment);
+
+        List<ProfessorConstraint> constraints = constraintRepository.findByProfessorId(professorId);
+        Set<Long> unavailable = new HashSet<>();
+        Set<Long> preferred = new HashSet<>();
+        for (ProfessorConstraint c : constraints) {
+            if (c.getType() == ConstraintType.UNAVAILABLE && c.isMandatory()) unavailable.add(c.getTimeSlot().getId());
+            if (c.getType() == ConstraintType.PREFERRED) preferred.add(c.getTimeSlot().getId());
+        }
+
+        List<ScheduleEntry> others = entryRepository.findAllOfTimetable(entry.getTimetable().getId()).stream()
+                .filter(o -> !o.getId().equals(entry.getId()))
+                .toList();
+        List<Room> suitableRooms = roomRepository.findAll().stream()
+                .filter(r -> r.getCapacity() >= audience.size() && roomFits(assignment.getType(), r.getType()))
+                .sorted(Comparator.comparing(Room::getCapacity))
+                .toList();
+
+        List<MoveOptionDto> options = new ArrayList<>();
+        List<TimeSlot> slots = new ArrayList<>(timeSlotRepository.findAll());
+        slots.sort(Comparator.comparing(TimeSlot::getDayOfWeek).thenComparing(TimeSlot::getStartTime));
+        for (TimeSlot slot : slots) {
+            if (slot.getId().equals(entry.getTimeSlot().getId()) || unavailable.contains(slot.getId())) {
+                continue;
+            }
+            List<ScheduleEntry> atSameTime = others.stream()
+                    .filter(o -> overlapInTime(slot, entry.getParity(), o.getTimeSlot(), o.getParity()))
+                    .toList();
+            boolean busy = atSameTime.stream().anyMatch(o ->
+                    o.getAssignment().getProfessor().getId().equals(professorId)
+                            || intersects(audience.subgroupIds(), resolver.of(o.getAssignment()).subgroupIds()));
+            if (busy) {
+                continue;
+            }
+            Set<Long> occupiedRooms = new HashSet<>();
+            atSameTime.forEach(o -> occupiedRooms.add(o.getRoom().getId()));
+            List<RoomDto> freeRooms = suitableRooms.stream()
+                    .filter(r -> !occupiedRooms.contains(r.getId()))
+                    .map(RoomDto::from)
+                    .toList();
+            if (!freeRooms.isEmpty()) {
+                options.add(new MoveOptionDto(slot.getId(), TimeSlotDto.label(slot), slot.getDayOfWeek(),
+                        slot.getStartTime(), slot.getEndTime(), preferred.contains(slot.getId()), freeRooms));
+            }
+        }
+        return options;
+    }
+
+    /** Aceleasi reguli ca generatorul: curs in amfiteatru, seminar in sala de seminar / amfiteatru, laborator / proiect in laborator. */
+    private static boolean roomFits(ActivityType type, RoomType room) {
+        return switch (type) {
+            case COURSE -> room == RoomType.LECTURE_HALL;
+            case SEMINAR -> room == RoomType.SEMINAR_ROOM || room == RoomType.LECTURE_HALL;
+            case LAB, PROJECT -> room == RoomType.LAB;
+        };
     }
 
     /** Acelasi slot si paritati compatibile (ALL se suprapune cu orice). */

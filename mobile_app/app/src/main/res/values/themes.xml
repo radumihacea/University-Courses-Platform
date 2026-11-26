@@ -1,0 +1,14 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema aplicatiei: Material 3, accent rosu UTCN, tema luminoasa / intunecata automat -->
+    <style name="Base.Theme.UCPMobile" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/utcn_red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/utcn_red_container</item>
+        <item name="colorOnPrimaryContainer">@color/utcn_on_red_container</item>
+        <item name="colorSecondary">@color/utcn_red</item>
+        <item name="colorSecondaryContainer">@color/utcn_red_container</item>
+        <item name="colorOnSecondaryContainer">@color/utcn_on_red_container</item>
+    </style>
+
+    <style name="Theme.UCPMobile" parent="Base.Theme.UCPMobile" />
+</resources>

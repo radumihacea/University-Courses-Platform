@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.UCPMobile" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/utcn_red_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorPrimaryContainer">@color/utcn_red_container_dark</item>
+        <item name="colorOnPrimaryContainer">@color/utcn_on_red_container_dark</item>
+        <item name="colorSecondary">@color/utcn_red_light</item>
+        <item name="colorSecondaryContainer">@color/utcn_red_container_dark</item>
+        <item name="colorOnSecondaryContainer">@color/utcn_on_red_container_dark</item>
+    </style>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Rosul UTCN, la fel ca in panoul web -->
+    <color name="utcn_red">#9D1B30</color>
+    <color name="utcn_red_container">#FFDADC</color>
+    <color name="utcn_on_red_container">#40000C</color>
+    <color name="utcn_red_light">#E2546A</color>
+    <color name="utcn_red_container_dark">#7E1426</color>
+    <color name="utcn_on_red_container_dark">#FFDADC</color>
+
+    <!-- Culorile tipurilor de activitate (ca in orarul web) -->
+    <color name="type_course">#9D1B30</color>
+    <color name="type_seminar">#1E88E5</color>
+    <color name="type_lab">#2E7D32</color>
+    <color name="type_project">#EF8F00</color>
+
+    <color name="live_on">#2E7D32</color>
+    <color name="error_text">#C62828</color>
+</resources>

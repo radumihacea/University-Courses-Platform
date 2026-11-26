@@ -2665,6 +2665,139 @@
           }
         }
       ]
+    },
+    {
+      "name": "Aplicatia mobila (optionale, mutari)",
+      "item": [
+        {
+          "name": "1. Student: optionalele mele",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/1/optionals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "1",
+                "optionals"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenStudent}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Necesita 'Login Student_1' din folderul Asistent AI. Salveaza id-ul primei optionale in {{optionalAssignmentId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && pm.response.json().length) {",
+                  "  pm.collectionVariables.set('optionalAssignmentId', pm.response.json()[0].assignmentId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Student: inscriere la optionala",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/1/optionals/{{optionalAssignmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "1",
+                "optionals",
+                "{{optionalAssignmentId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenStudent}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Student: renuntare la optionala",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/1/optionals/{{optionalAssignmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "1",
+                "optionals",
+                "{{optionalAssignmentId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenStudent}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Unde se poate muta o ora (sloturi + sali libere)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/change-requests/move-options?scheduleEntryId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "change-requests",
+                "move-options"
+              ],
+              "query": [
+                {
+                  "key": "scheduleEntryId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Pentru formularul de cerere de mutare din aplicatia mobila: sloturile in care profesorul si studentii sunt liberi, cu salile potrivite libere."
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -2678,6 +2811,10 @@
     },
     {
       "key": "tokenStudent",
+      "value": ""
+    },
+    {
+      "key": "optionalAssignmentId",
       "value": ""
     }
   ],
